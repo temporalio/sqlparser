@@ -2113,6 +2113,8 @@ const (
 	NotRegexpStr         = "not regexp"
 	StartsWithStr        = "starts_with"
 	NotStartsWithStr     = "not starts_with"
+	ContainsStr          = "contains"
+	NotContainsStr       = "not contains"
 	JSONExtractOp        = "->"
 	JSONUnquoteExtractOp = "->>"
 )

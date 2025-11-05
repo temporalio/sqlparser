@@ -134,6 +134,7 @@ func forceEOF(yylex interface{}) {
 %right <bytes> NOT '!'
 %left <bytes> BETWEEN CASE WHEN THEN ELSE END
 %left <bytes> '=' '<' '>' LE GE NE NULL_SAFE_EQUAL IS LIKE REGEXP IN STARTS_WITH
+%left <bytes> CONTAINS
 %left <bytes> '|'
 %left <bytes> '&'
 %left <bytes> SHIFT_LEFT SHIFT_RIGHT
@@ -1999,6 +2000,14 @@ condition:
   {
     $$ = &ExistsExpr{Subquery: $2}
   }
+| value_expression CONTAINS value_expression
+  {
+    $$ = &ComparisonExpr{Left: $1, Operator: ContainsStr, Right: $3}
+  }
+| value_expression NOT CONTAINS value_expression
+  {
+    $$ = &ComparisonExpr{Left: $1, Operator: NotContainsStr, Right: $4}
+  }
 
 is_suffix:
   NULL
@@ -3010,6 +3019,7 @@ reserved_keyword:
 | SHOW
 | STARTS_WITH
 | STRAIGHT_JOIN
+| CONTAINS
 | TABLE
 | TABLES
 | THEN
