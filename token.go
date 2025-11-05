@@ -126,6 +126,7 @@ var keywords = map[string]int{
 	"convert":             CONVERT,
 	"substr":              SUBSTR,
 	"substring":           SUBSTRING,
+	"contains":            CONTAINS,
 	"create":              CREATE,
 	"cross":               CROSS,
 	"current_date":        CURRENT_DATE,
