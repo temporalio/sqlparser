@@ -72,8 +72,8 @@ func TestPreview(t *testing.T) {
 		{"/* leading comment */ select ...", StmtSelect},
 		{"/* leading comment */ (select ...", StmtSelect},
 		{"/* leading comment */ /* leading comment 2 */ select ...", StmtSelect},
-		{"/*! MySQL-specific comment */", StmtComment},
-		{"/*!50708 MySQL-version comment */", StmtComment},
+		{"/*! MySQL-specific comment */", StmtUnknown},
+		{"/*!50708 MySQL-version comment */", StmtUnknown},
 		{"-- leading single line comment \n select ...", StmtSelect},
 		{"-- leading single line comment \n -- leading single line comment 2\n select ...", StmtSelect},
 

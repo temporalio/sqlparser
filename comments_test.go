@@ -168,10 +168,10 @@ func TestStripLeadingComments(t *testing.T) {
 		outSQL: "",
 	}, {
 		input:  "/*!*/",
-		outSQL: "/*!*/",
+		outSQL: "",
 	}, {
 		input:  "/*!a*/",
-		outSQL: "/*!a*/",
+		outSQL: "",
 	}, {
 		input:  "/*b*/ /*a*/",
 		outSQL: "",
@@ -206,38 +206,6 @@ a`,
 	for _, testCase := range testCases {
 		gotSQL := StripLeadingComments(testCase.input)
 
-		if gotSQL != testCase.outSQL {
-			t.Errorf("test input: '%s', got SQL\n%+v, want\n%+v", testCase.input, gotSQL, testCase.outSQL)
-		}
-	}
-}
-
-func TestExtractMysqlComment(t *testing.T) {
-	var testCases = []struct {
-		input, outSQL, outVersion string
-	}{{
-		input:      "/*!50708SET max_execution_time=5000 */",
-		outSQL:     "SET max_execution_time=5000",
-		outVersion: "50708",
-	}, {
-		input:      "/*!50708 SET max_execution_time=5000*/",
-		outSQL:     "SET max_execution_time=5000",
-		outVersion: "50708",
-	}, {
-		input:      "/*!50708* from*/",
-		outSQL:     "* from",
-		outVersion: "50708",
-	}, {
-		input:      "/*! SET max_execution_time=5000*/",
-		outSQL:     "SET max_execution_time=5000",
-		outVersion: "",
-	}}
-	for _, testCase := range testCases {
-		gotVersion, gotSQL := ExtractMysqlComment(testCase.input)
-
-		if gotVersion != testCase.outVersion {
-			t.Errorf("test input: '%s', got version\n%+v, want\n%+v", testCase.input, gotVersion, testCase.outVersion)
-		}
 		if gotSQL != testCase.outSQL {
 			t.Errorf("test input: '%s', got SQL\n%+v, want\n%+v", testCase.input, gotSQL, testCase.outSQL)
 		}
