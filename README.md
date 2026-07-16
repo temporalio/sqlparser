@@ -1,3 +1,12 @@
+[!WARNING]
+**Unsupported outside Temporal Server**
+
+This repository is a compatibility fork maintained solely as an implementation dependency of
+Temporal Server. It is not a supported standalone library. Do not import or deploy this module in
+other applications. Any use outside Temporal Server is unsupported and at your own risk.
+
+If you need equivalent functionality, use a maintained alternative appropriate for your application.
+
 # sqlparser [![Build Status](https://img.shields.io/travis/xwb1989/sqlparser.svg)](https://travis-ci.org/xwb1989/sqlparser) [![Coverage](https://img.shields.io/coveralls/xwb1989/sqlparser.svg)](https://coveralls.io/github/xwb1989/sqlparser) [![Report card](https://goreportcard.com/badge/github.com/xwb1989/sqlparser)](https://goreportcard.com/report/github.com/xwb1989/sqlparser) [![GoDoc](https://godoc.org/github.com/xwb1989/sqlparser?status.svg)](https://godoc.org/github.com/xwb1989/sqlparser)
 
 Go package for parsing MySQL SQL queries.
