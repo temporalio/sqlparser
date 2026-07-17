@@ -1996,6 +1996,15 @@ var (
 			"(F(F(F(F(F(F(F(F(F(F(F(",
 		output: "syntax error at position 404",
 	}, {
+		input:  "select " + strings.Repeat("~", 300) + "1 from t",
+		output: "max nesting level reached at position 208",
+	}, {
+		input:  "select 1 from t where " + strings.Repeat("not ", 300) + "1",
+		output: "max nesting level reached at position 822 near 'not'",
+	}, {
+		input:  "select 1 from t where " + strings.Repeat("a=1 and ", 1000) + "a=1",
+		output: "max expression depth reached",
+	}, {
 		// This construct is considered invalid due to a grammar conflict.
 		input:  "insert into a select * from b join c on duplicate key update d=e",
 		output: "syntax error at position 54 near 'key'",
