@@ -556,20 +556,19 @@ var (
 	}, {
 		input: "select /* string in case statement */ if(max(case a when 'foo' then 1 else 0 end) = 1, 'foo', 'bar') as foobar from t",
 	}, {
-		input:  "/*!show databases*/",
-		output: "show databases",
-	}, {
 		input:  "select /*!40101 * from*/ t",
-		output: "select * from t",
+		output: "select /*!40101 * from*/ t from dual",
 	}, {
 		input:  "select /*! * from*/ t",
-		output: "select * from t",
+		output: "select /*! * from*/ t from dual",
 	}, {
 		input:  "select /*!* from*/ t",
-		output: "select * from t",
+		output: "select /*!* from*/ t from dual",
 	}, {
 		input:  "select /*!401011 from*/ t",
-		output: "select 1 from t",
+		output: "select /*!401011 from*/ t from dual",
+	}, {
+		input: "select /*!*/ * from t",
 	}, {
 		input: "select /* dual */ 1 from dual",
 	}, {

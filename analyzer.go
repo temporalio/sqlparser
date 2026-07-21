@@ -45,7 +45,6 @@ const (
 	StmtUse
 	StmtOther
 	StmtUnknown
-	StmtComment
 )
 
 // Preview analyzes the beginning of the query using a simpler and faster
@@ -99,9 +98,6 @@ func Preview(sql string) int {
 		return StmtUse
 	case "analyze", "describe", "desc", "explain", "repair", "optimize":
 		return StmtOther
-	}
-	if strings.Index(trimmed, "/*!") == 0 {
-		return StmtComment
 	}
 	return StmtUnknown
 }
