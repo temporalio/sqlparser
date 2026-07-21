@@ -1913,9 +1913,17 @@ expression:
   {
     $$ = &OrExpr{Left: $1, Right: $3}
   }
-| NOT expression
+| NOT
   {
-    $$ = &NotExpr{Expr: $2}
+    if incNesting(yylex) {
+      yylex.Error("max nesting level reached")
+      return 1
+    }
+  }
+  expression
+  {
+    $$ = &NotExpr{Expr: $3}
+    decNesting(yylex)
   }
 | expression IS is_suffix
   {
@@ -2176,25 +2184,56 @@ value_expression:
   {
     $$ = &CollateExpr{Expr: $1, Charset: $3}
   }
-| BINARY value_expression %prec UNARY
+| BINARY
   {
-    $$ = &UnaryExpr{Operator: BinaryStr, Expr: $2}
-  }
-| UNDERSCORE_BINARY value_expression %prec UNARY
-  {
-    $$ = &UnaryExpr{Operator: UBinaryStr, Expr: $2}
-  }
-| '+'  value_expression %prec UNARY
-  {
-    if num, ok := $2.(*SQLVal); ok && num.Type == IntVal {
-      $$ = num
-    } else {
-      $$ = &UnaryExpr{Operator: UPlusStr, Expr: $2}
+    if incNesting(yylex) {
+      yylex.Error("max nesting level reached")
+      return 1
     }
   }
-| '-'  value_expression %prec UNARY
+  value_expression %prec UNARY
   {
-    if num, ok := $2.(*SQLVal); ok && num.Type == IntVal {
+    $$ = &UnaryExpr{Operator: BinaryStr, Expr: $3}
+    decNesting(yylex)
+  }
+| UNDERSCORE_BINARY
+  {
+    if incNesting(yylex) {
+      yylex.Error("max nesting level reached")
+      return 1
+    }
+  }
+  value_expression %prec UNARY
+  {
+    $$ = &UnaryExpr{Operator: UBinaryStr, Expr: $3}
+    decNesting(yylex)
+  }
+| '+'
+  {
+    if incNesting(yylex) {
+      yylex.Error("max nesting level reached")
+      return 1
+    }
+  }
+  value_expression %prec UNARY
+  {
+    if num, ok := $3.(*SQLVal); ok && num.Type == IntVal {
+      $$ = num
+    } else {
+      $$ = &UnaryExpr{Operator: UPlusStr, Expr: $3}
+    }
+    decNesting(yylex)
+  }
+| '-'
+  {
+    if incNesting(yylex) {
+      yylex.Error("max nesting level reached")
+      return 1
+    }
+  }
+  value_expression %prec UNARY
+  {
+    if num, ok := $3.(*SQLVal); ok && num.Type == IntVal {
       // Handle double negative
       if num.Val[0] == '-' {
         num.Val = num.Val[1:]
@@ -2203,24 +2242,49 @@ value_expression:
         $$ = NewIntVal(append([]byte("-"), num.Val...))
       }
     } else {
-      $$ = &UnaryExpr{Operator: UMinusStr, Expr: $2}
+      $$ = &UnaryExpr{Operator: UMinusStr, Expr: $3}
+    }
+    decNesting(yylex)
+  }
+| '~'
+  {
+    if incNesting(yylex) {
+      yylex.Error("max nesting level reached")
+      return 1
     }
   }
-| '~'  value_expression
+  value_expression
   {
-    $$ = &UnaryExpr{Operator: TildaStr, Expr: $2}
+    $$ = &UnaryExpr{Operator: TildaStr, Expr: $3}
+    decNesting(yylex)
   }
-| '!' value_expression %prec UNARY
+| '!'
   {
-    $$ = &UnaryExpr{Operator: BangStr, Expr: $2}
+    if incNesting(yylex) {
+      yylex.Error("max nesting level reached")
+      return 1
+    }
   }
-| INTERVAL value_expression sql_id
+  value_expression %prec UNARY
+  {
+    $$ = &UnaryExpr{Operator: BangStr, Expr: $3}
+    decNesting(yylex)
+  }
+| INTERVAL
+  {
+    if incNesting(yylex) {
+      yylex.Error("max nesting level reached")
+      return 1
+    }
+  }
+  value_expression sql_id
   {
     // This rule prevents the usage of INTERVAL
     // as a function. If support is needed for that,
     // we'll need to revisit this. The solution
     // will be non-trivial because of grammar conflicts.
-    $$ = &IntervalExpr{Expr: $2, Unit: $3.String()}
+    $$ = &IntervalExpr{Expr: $3, Unit: $4.String()}
+    decNesting(yylex)
   }
 | function_call_generic
 | function_call_keyword

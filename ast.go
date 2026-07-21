@@ -41,6 +41,12 @@ import (
 // a set of types, define the function as iTypeName.
 // This will help avoid name collisions.
 
+// maxExprDepth bounds the depth of the parsed Expr tree. Left-recursive
+// rules (a AND b AND c ...) don't grow the parser stack, but produce a
+// left-heavy AST whose depth scales with input length; deep trees can
+// stack-overflow recursive AST consumers (Walk, Format, ...).
+const maxExprDepth = 1000
+
 // Parse parses the SQL in full and returns a Statement, which
 // is the AST representation of the query. If a DDL statement
 // is partially parsed but still contains a syntax error, the
@@ -55,6 +61,9 @@ func Parse(sql string) (Statement, error) {
 		}
 		return nil, tokenizer.LastError
 	}
+	if err := checkExprDepth(tokenizer.ParseTree); err != nil {
+		return nil, err
+	}
 	return tokenizer.ParseTree, nil
 }
 
@@ -64,6 +73,9 @@ func ParseStrictDDL(sql string) (Statement, error) {
 	tokenizer := NewStringTokenizer(sql)
 	if yyParse(tokenizer) != 0 {
 		return nil, tokenizer.LastError
+	}
+	if err := checkExprDepth(tokenizer.ParseTree); err != nil {
+		return nil, err
 	}
 	return tokenizer.ParseTree, nil
 }
@@ -91,7 +103,32 @@ func ParseNext(tokenizer *Tokenizer) (Statement, error) {
 		}
 		return nil, tokenizer.LastError
 	}
+	if err := checkExprDepth(tokenizer.ParseTree); err != nil {
+		return nil, err
+	}
 	return tokenizer.ParseTree, nil
+}
+
+// checkExprDepth walks the AST and returns an error if any Expr subtree
+// exceeds maxExprDepth. Recursion is bounded by maxExprDepth (returns
+// early on the offending path), so the check itself cannot stack-overflow.
+func checkExprDepth(root SQLNode) error {
+	if root == nil {
+		return nil
+	}
+	var check func(node SQLNode, depth int) error
+	check = func(node SQLNode, depth int) error {
+		if _, isExpr := node.(Expr); isExpr {
+			depth++
+			if depth > maxExprDepth {
+				return fmt.Errorf("max expression depth reached")
+			}
+		}
+		return node.walkSubtree(func(child SQLNode) (bool, error) {
+			return false, check(child, depth)
+		})
+	}
+	return check(root, 0)
 }
 
 // SplitStatement returns the first sql statement up to either a ; or EOF
