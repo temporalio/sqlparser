@@ -2002,7 +2002,10 @@ var (
 		output: "max nesting level reached at position 822 near 'not'",
 	}, {
 		input:  "select 1 from t where " + strings.Repeat("a=1 and ", 1000) + "a=1",
-		output: "max expression depth reached",
+		output: "max ast depth reached",
+	}, {
+		input:  "select 1 from t" + strings.Repeat(" union select 1 from t", 1000),
+		output: "max ast depth reached",
 	}, {
 		// This construct is considered invalid due to a grammar conflict.
 		input:  "insert into a select * from b join c on duplicate key update d=e",
